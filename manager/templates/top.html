@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Anicap Machine{% endblock %}
+{% load staticfiles %}
+
+{% block body %}
+  <div class="row" style="margin-top:50px;">
+    <form action="/" method="post" class="col-md-4">
+      {% csrf_token %}
+      <div class="form-group row">
+        あにこ便からキャプ画をダウンロード
+      </div>
+
+      <div class="form-group row">
+        <label class="col-md-4 col-form-label">開始ページ</label>
+        <div class="col-md-6">
+          <input type="start" value=1 class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-md-4 col-form-label">終了ページ</label>
+        <div class="col-md-6">
+          <input type="end" value=10 class="form-control" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary col-md-offset-4">スクレイピング開始</button>
+    </form>
+
+    <form action="/" method="post" class="col-md-4">
+      {% csrf_token %}
+      <div class="form-group row">
+        あにこ便からキャプ画をダウンロード
+      </div>
+
+      <div class="form-group row">
+        <label class="col-md-4 col-form-label">アニメタイトル</label>
+        <div class="col-md-6">
+          <input type="anime" class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-md-4 col-form-label">話数</label>
+        <div class="col-md-6">
+          <input type="story_no" value=1 class="form-control" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary col-md-offset-4">顔検出開始</button>
+    </form>
+
+    <form action="/" method="post" class="col-md-4">
+      {% csrf_token %}
+      <div class="form-group row">
+        あにこ便からキャプ画をダウンロード
+      </div>
+
+      <div class="form-group row">
+        <label class="col-md-4 col-form-label">アニメタイトル</label>
+        <div class="col-md-6">
+          <input type="anime" class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-md-4 col-form-label">話数</label>
+        <div class="col-md-6">
+          <input type="story_no" value=1 class="form-control" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary col-md-offset-4">重複削除開始</button>
+    </form>
+  </div>
+{% endblock %}

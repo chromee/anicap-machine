@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang='ja'>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- jquery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <title>Anicap Machine</title>
+</head>
+<body>
+  <nav class="navbar navbar-default navbar-static-top manager-nav no-margin" role="navigation">
+   <div class="navbar-header">
+     <a class="navbar-brand">Anicap Machine</a>
+   </div>
+ </nav>
+  <div class="container">
+    {% block body %}
+    {% endblock %}
+  </div>
+</body>
+</html>
