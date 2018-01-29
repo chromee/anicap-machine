@@ -1,13 +1,10 @@
 import os
 import re
 import sys
-import struct
 import requests
-import urllib.request
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from bs4 import BeautifulSoup
-import concurrent.futures
 
 
 class CapScraper:
@@ -45,8 +42,6 @@ class CapScraper:
                     try:
                         if not self.__is_cap(img_url): continue
                         img_url = self.__remake_img_url(img_url)
-                        # image_size = self.__get_img_size(img_url)
-                        # if not (image_size[0] > x and image_size[1] > y): continue
 
                         session = requests.Session()
                         retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
@@ -54,7 +49,6 @@ class CapScraper:
                         session.mount("https://", HTTPAdapter(max_retries=retries))
                         response = session.get(url=img_url, stream=True, timeout=(10.0, 30.0))
                         response.raise_for_status()
-                        # response = requests.get(img_url, allow_redirects=True, timeout=10)
 
                         image = response.content
 
@@ -96,26 +90,3 @@ class CapScraper:
         elif ext == ".png":
             remade_url = img_url.replace('-s.png', '.png')
         return remade_url
-
-
-    def __get_img_size(self, url):
-        response = urllib.request.urlopen(url)
-        size = (-1, -1)
-        if response.status == 200:
-            signature = response.read(2)
-            if signature == b'\xff\xd8':  # jpg
-                while not response.closed:
-                    (marker, size) = struct.unpack('>2sH', response.read(4))
-                    if marker == b'\xff\xc0':
-                        (_, height, width, _) = struct.unpack('>chh10s', response.read(size - 2))
-                        size = width, height
-                    else:
-                        response.read(size - 2)
-            elif signature == b'\x89\x50':  # png
-                (_, width, height) = struct.unpack(">14sII", response.read(22))
-                size = width, height
-            elif signature == b'\x47\x49':  # gif
-                (_, width, height) = struct.unpack("<4sHH", response.read(8))
-                size = width, height
-        response.close()
-        return size
