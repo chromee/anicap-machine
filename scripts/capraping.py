@@ -9,11 +9,9 @@ from bs4 import BeautifulSoup
 
 class CapScraper:
 
-    global x, y, start, end, save_dir
+    global start, end, save_dir
 
-    def __init__(self, min_x, min_y, start_page, end_page, save):
-        self.x = min_x
-        self.y = min_y
+    def __init__(self, start_page, end_page, save):
         self.start = start_page
         self.end = end_page
         self.save_dir = save
