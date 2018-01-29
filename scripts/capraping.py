@@ -1,6 +1,5 @@
 import os
 import re
-import sys
 import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
@@ -33,8 +32,8 @@ class CapScraper:
                     story_no = re.search(r"第(?P<no>.*?)話", page_title).group("no")
                     img_url_array = [link.get('src') for link in soup.find_all('img')]
                     img_index = 1
-                except:
-                    print("anime error", sys.exc_info())
+                except Exception as e:
+                    print(e)
                     continue
                 for img_url in img_url_array:
                     try:
@@ -65,8 +64,8 @@ class CapScraper:
                         with open(file_path, "wb") as file:
                             file.write(image)
                         img_index += 1
-                    except:
-                        print("img error", sys.exc_info())
+                    except Exception as e:
+                        print(e)
                         continue
 
 

@@ -1,8 +1,8 @@
 import os
 import cv2
 import shutil
-from pathlib import Path
 import numpy as np
+from pathlib import Path
 
 
 class CapManager:
@@ -10,33 +10,35 @@ class CapManager:
     SAFE_MODE = 0
     DELETE_MODE = 1
 
-    def ___init___(self, dir):
-        root = Path(__file__).parent.parent
+    global caps_dir, face_cascade
+
+    def __init__(self, dir):
         self.caps_dir = Path(dir)
-        self.face_cascade = cv2.CascadeClassifier(str(root.joinpath(r"cascaders/lbpcascade_animeface.xml")))
+        self.face_cascade = cv2.CascadeClassifier(str(Path(__file__).parent.parent.joinpath(r"cascaders/lbpcascade_animeface.xml")))
 
     def extract_face_and_save(self):
         save_dir = str(self.caps_dir.joinpath("face"))
         if not os.path.exists(save_dir): os.mkdir(save_dir)
 
-        for file in self.__find_all_files(self.caps_dir):
+        for file in self.find_all_files():
             if os.path.isdir(file): continue
+            print(file)
             img = self.__imread(file)
             face_rect = self.__get_faces(img)
             if face_rect is None: continue
 
             for (x, y, w, h) in face_rect:
-                self.__imwrite("", img[y:y+h, x:x+w])
+                self.__imwrite(save_dir+"\\"+os.path.basename(file), img[y:y+h, x:x+w])
 
-    def __find_all_files(self, directory):
-        for root, dirs, files in os.walk(directory):
+    def find_all_files(self):
+        for root, dirs, files in os.walk(str(self.caps_dir)):
             yield root
             for file_path in files:
                 yield os.path.join(root, file_path)
 
     def __get_faces(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        face_rect = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=1, minSize=(10,10))
+        face_rect = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=1, minSize=(10, 10))
 
         if len(face_rect) <= 0: return None
         return face_rect
@@ -47,7 +49,7 @@ class CapManager:
             img = cv2.imdecode(n, flags)
             return img
         except Exception as e:
-            print(e)
+            print("READ ERROR", e)
             return None
 
     def __imwrite(self, filename, img, params=None):
@@ -62,7 +64,7 @@ class CapManager:
             else:
                 return False
         except Exception as e:
-            print(e)
+            print("WRITE ERROR", e)
             return False
 
     def delete_similar_pictures(self, mode):
