@@ -10,11 +10,9 @@ class CapManager:
     SAFE_MODE = 0
     DELETE_MODE = 1
 
-    def ___init___(self, cap, anime, story_no):
-        self.anime = anime
-        self.story_no = story_no
+    def ___init___(self, dir):
         root = Path(__file__).parent.parent
-        self.caps_dir = str(Path(cap).joinpath(anime).joinpath(story_no))
+        self.caps_dir = Path(dir)
         self.face_cascade = cv2.CascadeClassifier(str(root.joinpath(r"cascaders/lbpcascade_animeface.xml")))
 
     def extract_face_and_save(self):
