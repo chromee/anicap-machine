@@ -33,7 +33,7 @@ class CapScraper:
                     img_url_array = [link.get('src') for link in soup.find_all('img')]
                     img_index = 1
                 except Exception as e:
-                    print(e)
+                    print("ANIME ERROR", e)
                     continue
                 for img_url in img_url_array:
                     try:
@@ -65,7 +65,28 @@ class CapScraper:
                             file.write(image)
                         img_index += 1
                     except Exception as e:
-                        print(e)
+                        try:
+                            anime_dir = os.path.join(self.save_dir, anime_title)
+                            anime_dir = anime_dir.replace("Fate/", "Fate ")
+                            print(anime_dir)
+                            if not os.path.exists(anime_dir): os.mkdir(anime_dir)
+                            story_dir = os.path.join(anime_dir, "%s話" % story_no)
+                            if not os.path.exists(story_dir): os.mkdir(story_dir)
+
+                            file = "%s_%s話_%s" % (anime_title, story_no, img_index)
+                            ext = os.path.splitext(img_url)[1]
+                            file_name = file + ext
+                            file_path = os.path.join(story_dir, file_name)
+
+                            file_path = file_path.replace("Fate/", "Fate ")
+                            print(file_path)
+
+                            with open(file_path, "wb") as file:
+                                file.write(image)
+                            img_index += 1
+                        except:
+                            continue
+                        print("IMG ERROR", e)
                         continue
 
 
