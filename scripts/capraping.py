@@ -7,7 +7,9 @@ import urllib.request
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from bs4 import BeautifulSoup
-import concurrent.futures
+import time
+import asyncio
+import aiohttp
 
 
 class CapScraper:
@@ -41,42 +43,41 @@ class CapScraper:
                 except:
                     print("anime error", sys.exc_info())
                     continue
+                startt = time.time()
                 for img_url in img_url_array:
                     try:
                         if not self.__is_cap(img_url): continue
                         img_url = self.__remake_img_url(img_url)
-                        # image_size = self.__get_img_size(img_url)
-                        # if not (image_size[0] > x and image_size[1] > y): continue
 
-                        session = requests.Session()
-                        retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
-                        session.mount("http://", HTTPAdapter(max_retries=retries))
-                        session.mount("https://", HTTPAdapter(max_retries=retries))
-                        response = session.get(url=img_url, stream=True, timeout=(10.0, 30.0))
-                        response.raise_for_status()
-                        # response = requests.get(img_url, allow_redirects=True, timeout=10)
+                        loop = asyncio.get_event_loop()
+                        with aiohttp.ClientSession(loop=loop) as session:
+                            image = loop.run_until_complete(self.download_img(session, img_url))
+                            anime_dir = os.path.join(self.save_dir, anime_title)
+                            if not os.path.exists(anime_dir): os.mkdir(anime_dir)
+                            story_dir = os.path.join(anime_dir, "%s話" % story_no)
+                            if not os.path.exists(story_dir): os.mkdir(story_dir)
 
-                        image = response.content
+                            file = "%s_%s話_%s" % (anime_title, story_no, img_index)
+                            ext = os.path.splitext(img_url)[1]
+                            file_name = file + ext
+                            file_path = os.path.join(story_dir, file_name)
 
-                        anime_dir = os.path.join(self.save_dir, anime_title)
-                        if not os.path.exists(anime_dir): os.mkdir(anime_dir)
-                        story_dir = os.path.join(anime_dir, "%s話" % story_no)
-                        if not os.path.exists(story_dir): os.mkdir(story_dir)
+                            print(file_path)
 
-                        file = "%s_%s話_%s" % (anime_title, story_no, img_index)
-                        ext = os.path.splitext(img_url)[1]
-                        file_name = file + ext
-                        file_path = os.path.join(story_dir, file_name)
-
-                        print(file_path)
-
-                        with open(file_path, "wb") as file:
-                            file.write(image)
-                        img_index += 1
+                            with open(file_path, "wb") as file:
+                                file.write(image)
+                            img_index += 1
                     except:
                         print("img error", sys.exc_info())
                         continue
+                end = time.time()
+                print("{0} ms".format((end - startt) * 1000))
 
+    async def download_img(self, session, img_url):
+        with aiohttp.Timeout(10):
+            async with session.get(img_url) as response:
+                assert response.status == 200
+                return await response.read()
 
     # あにこ便でのみ使用可
     def __is_cap(self, img_url):
