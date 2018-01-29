@@ -2,6 +2,7 @@ import os
 import cv2
 import shutil
 from pathlib import Path
+import numpy as np
 
 
 class CapManager:
@@ -9,25 +10,31 @@ class CapManager:
     SAFE_MODE = 0
     DELETE_MODE = 1
 
-    def ___init___(self, anime, story_no):
+    def ___init___(self, cap, anime, story_no):
         self.anime = anime
         self.story_no = story_no
-        self.caps_dir = Path(__file__).parent.parent.parent.parent.joinpath("images").joinpath(anime).joinpath(story_no)
-        self.face_cascade = cv2.CascadeClassifier(str(Path(__file__).parent.parent.joinpath("cascaders/lbpcascade_animeface.xml")))
+        root = Path(__file__).parent.parent
+        self.caps_dir = str(Path(cap).joinpath(anime).joinpath(story_no))
+        self.face_cascade = cv2.CascadeClassifier(str(root.joinpath(r"cascaders/lbpcascade_animeface.xml")))
 
-    def extract_and_save_face(self):
-        files = os.listdir(str(self.caps_dir))
-        if len(files) == 0: return
-
+    def extract_face_and_save(self):
         save_dir = str(self.caps_dir.joinpath("face"))
         if not os.path.exists(save_dir): os.mkdir(save_dir)
-        for file in files:
-            img = cv2.imread(file)
+
+        for file in self.__find_all_files(self.caps_dir):
+            if os.path.isdir(file): continue
+            img = self.__imread(file)
             face_rect = self.__get_faces(img)
             if face_rect is None: continue
 
             for (x, y, w, h) in face_rect:
-                cv2.imwrite("", img[y:y+h, x:x+w])
+                self.__imwrite("", img[y:y+h, x:x+w])
+
+    def __find_all_files(self, directory):
+        for root, dirs, files in os.walk(directory):
+            yield root
+            for file_path in files:
+                yield os.path.join(root, file_path)
 
     def __get_faces(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -35,6 +42,30 @@ class CapManager:
 
         if len(face_rect) <= 0: return None
         return face_rect
+
+    def __imread(self, filename, flags=cv2.IMREAD_COLOR, dtype=np.uint8):
+        try:
+            n = np.fromfile(filename, dtype)
+            img = cv2.imdecode(n, flags)
+            return img
+        except Exception as e:
+            print(e)
+            return None
+
+    def __imwrite(self, filename, img, params=None):
+        try:
+            ext = os.path.splitext(filename)[1]
+            result, n = cv2.imencode(ext, img, params)
+
+            if result:
+                with open(filename, mode='w+b') as f:
+                    n.tofile(f)
+                return True
+            else:
+                return False
+        except Exception as e:
+            print(e)
+            return False
 
     def delete_similar_pictures(self, mode):
         files = os.listdir(str(self.caps_dir))
