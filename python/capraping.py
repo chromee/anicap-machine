@@ -9,14 +9,16 @@ cap_save_dir = ""
 
 class Capraping:
 
-    def __init__(self, x, y, start, end):
-        self.x = x
-        self.y = y
-        self.start = start
-        self.end = end
+    global x, y, start, end
+
+    def __init__(self, min_x, min_y, start_page, end_page):
+        self.x = min_x
+        self.y = min_y
+        self.start = start_page
+        self.end = end_page
 
     def execute(self):
-        for i in range(start, end):
+        for i in range(self.start, self.end):
             root_url = "http://anicobin.ldblog.jp/?p="+str(i)
             response = requests.get(root_url, allow_redirects=True, timeout=10)
             soup = BeautifulSoup(response.text)
@@ -29,8 +31,8 @@ class Capraping:
                 img_url_array = [link.get('src') for link in soup.find_all('img')]
 
                 page_title = soup.find("h1", class_="article-title").string
-                anime_title = re.search(r"【(?P<name>.*)】", page_title).group("name")
-                story_no = re.search(r"第(?P<no>.*)話", anime_title).group("no")
+                anime_title = re.search(r"【(?P<name>.*?)】", page_title).group("name")
+                story_no = re.search(r"第(?P<no>.*?)話", anime_title).group("no")
 
                 img_index = 1
                 for img_url in img_url_array:
