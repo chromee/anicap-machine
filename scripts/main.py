@@ -1,7 +1,7 @@
 from scripts.capraping import CapScraper
 from scripts.cap_manager import CapManager
 
-# Windows用
+## Windows用
 # cap_dir = r"D:¥cap2"
 # face_dir = r"D:¥cap2¥_face"
 

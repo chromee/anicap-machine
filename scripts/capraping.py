@@ -27,9 +27,18 @@ class CapScraper:
                     response = requests.get(anime_url, allow_redirects=True, timeout=10)
                     soup = BeautifulSoup(response.text)
 
+                    # ページタイトルからアニメと話数を抽出
                     page_title = soup.find("h1", class_="article-title").string
                     anime_title = re.search(r"【(?P<name>.*?)】", page_title).group("name")
+                    anime_title = re.sub(r'[¥/:*?"<>|]', " ", anime_title)
                     story_no = re.search(r"第(?P<no>.*?)話", page_title).group("no")
+
+                    # キャプ保存用ディレクトリ作成
+                    anime_dir = os.path.join(self.save_dir, anime_title)
+                    if not os.path.exists(anime_dir): os.mkdir(anime_dir)
+                    story_dir = os.path.join(anime_dir, "%s話" % story_no)
+                    if not os.path.exists(story_dir): os.mkdir(story_dir)
+
                     img_url_array = [link.get('src') for link in soup.find_all('img')]
                     img_index = 1
                 except Exception as e:
@@ -37,8 +46,8 @@ class CapScraper:
                     continue
                 for img_url in img_url_array:
                     try:
-                        if not self.__is_cap(img_url): continue
-                        img_url = self.__remake_img_url(img_url)
+                        if not self.is_cap(img_url): continue
+                        img_url = self.remake_img_url(img_url)
 
                         session = requests.Session()
                         retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
@@ -49,15 +58,9 @@ class CapScraper:
 
                         image = response.content
 
-                        anime_dir = os.path.join(self.save_dir, anime_title)
-                        if not os.path.exists(anime_dir): os.mkdir(anime_dir)
-                        story_dir = os.path.join(anime_dir, "%s話" % story_no)
-                        if not os.path.exists(story_dir): os.mkdir(story_dir)
-
                         file = "%s_%s話_%s" % (anime_title, story_no, img_index)
                         ext = os.path.splitext(img_url)[1]
-                        file_name = file + ext
-                        file_path = os.path.join(story_dir, file_name)
+                        file_path = os.path.join(story_dir, file + ext)
 
                         print(file_path)
 
@@ -65,33 +68,15 @@ class CapScraper:
                             file.write(image)
                         img_index += 1
                     except Exception as e:
-                        try:
-                            anime_dir = os.path.join(self.save_dir, anime_title)
-                            anime_dir = anime_dir.replace("Fate/", "Fate ")
-                            print(anime_dir)
-                            if not os.path.exists(anime_dir): os.mkdir(anime_dir)
-                            story_dir = os.path.join(anime_dir, "%s話" % story_no)
-                            if not os.path.exists(story_dir): os.mkdir(story_dir)
-
-                            file = "%s_%s話_%s" % (anime_title, story_no, img_index)
-                            ext = os.path.splitext(img_url)[1]
-                            file_name = file + ext
-                            file_path = os.path.join(story_dir, file_name)
-
-                            file_path = file_path.replace("Fate/", "Fate ")
-                            print(file_path)
-
-                            with open(file_path, "wb") as file:
-                                file.write(image)
-                            img_index += 1
-                        except:
-                            continue
                         print("IMG ERROR", e)
                         continue
 
+    def extract_img_urls(self, page_url):
+
+
 
     # あにこ便でのみ使用可
-    def __is_cap(self, img_url):
+    def is_cap(self, img_url):
         pattern = r"http://livedoor.blogimg.jp/anico_bin/imgs/.*-s.(jpg|png|gif)"
         anti_pattern = r"http://resize.blogsys.jp/.*/" + pattern
         result = len(re.findall(pattern, img_url)) > 0
@@ -100,7 +85,7 @@ class CapScraper:
 
 
     # あにこ便でのみ使用可
-    def __remake_img_url(self, img_url):
+    def remake_img_url(self, img_url):
         remade_url = ""
         ext = os.path.splitext(img_url)[1]
         if ext == ".jpg":
