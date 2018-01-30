@@ -26,7 +26,7 @@ class CapManager:
 
         for file in self.find_all_files():
             if os.path.isdir(file): continue
-            print(file)
+            print("face detect:", file)
             img = self.imread(file)
             face_rect = self.get_faces(img)
 
@@ -35,7 +35,7 @@ class CapManager:
                 continue
 
             for (x, y, w, h) in face_rect:
-                self.imwrite(save_dir+"/"+os.path.basename(file), img[y:y+h, x:x+w])
+                self.imwrite(self.save_dir+"/"+os.path.basename(file), img[y:y+h, x:x+w])
         self.no_face_img_db.close()
 
     def find_all_files(self):
