@@ -1,4 +1,5 @@
 import os
+import csv
 import cv2
 import shutil
 import numpy as np
@@ -10,25 +11,32 @@ class CapManager:
     SAFE_MODE = 0
     DELETE_MODE = 1
 
-    global caps_dir, face_cascade
+    global caps_dir, face_cascade, no_face_img_db
 
     def __init__(self, dir):
+        project_dir = Path(__file__).parent.parent
+        self.face_cascade = cv2.CascadeClassifier(str(project_dir.joinpath(r"cascaders/lbpcascade_animeface.xml")))
+        self.no_face_img_db = open(str(project_dir.joinpath(r'data/no_face_img_db.csv')), 'w')
         self.caps_dir = Path(dir)
-        self.face_cascade = cv2.CascadeClassifier(str(Path(__file__).parent.parent.joinpath(r"cascaders/lbpcascade_animeface.xml")))
 
     def extract_face_and_save(self):
-        save_dir = str(self.caps_dir.joinpath("face"))
+        save_dir = str(self.caps_dir.parent.joinpath("face"))
         if not os.path.exists(save_dir): os.mkdir(save_dir)
+        writer = csv.writer(self.no_face_img_db, lineterminator='\n')
 
         for file in self.find_all_files():
             if os.path.isdir(file): continue
             print(file)
-            img = self.__imread(file)
-            face_rect = self.__get_faces(img)
-            if face_rect is None: continue
+            img = self.imread(file)
+            face_rect = self.get_faces(img)
+
+            if face_rect is None:
+                writer.writerow([file])
+                continue
 
             for (x, y, w, h) in face_rect:
-                self.__imwrite(save_dir+"\\"+os.path.basename(file), img[y:y+h, x:x+w])
+                self.imwrite(save_dir+"/"+os.path.basename(file), img[y:y+h, x:x+w])
+        self.no_face_img_db.close()
 
     def find_all_files(self):
         for root, dirs, files in os.walk(str(self.caps_dir)):
@@ -36,14 +44,14 @@ class CapManager:
             for file_path in files:
                 yield os.path.join(root, file_path)
 
-    def __get_faces(self, img):
+    def get_faces(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         face_rect = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=1, minSize=(10, 10))
 
         if len(face_rect) <= 0: return None
         return face_rect
 
-    def __imread(self, filename, flags=cv2.IMREAD_COLOR, dtype=np.uint8):
+    def imread(self, filename, flags=cv2.IMREAD_COLOR, dtype=np.uint8):
         try:
             n = np.fromfile(filename, dtype)
             img = cv2.imdecode(n, flags)
@@ -52,7 +60,7 @@ class CapManager:
             print("READ ERROR", e)
             return None
 
-    def __imwrite(self, filename, img, params=None):
+    def imwrite(self, filename, img, params=None):
         try:
             ext = os.path.splitext(filename)[1]
             result, n = cv2.imencode(ext, img, params)
