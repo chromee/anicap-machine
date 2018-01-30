@@ -11,17 +11,17 @@ class CapManager:
     SAFE_MODE = 0
     DELETE_MODE = 1
 
-    global caps_dir, face_cascade, no_face_img_db
+    global caps_dir, save_dir, face_cascade, no_face_img_db
 
-    def __init__(self, dir):
+    def __init__(self, dir, face_dir):
         project_dir = Path(__file__).parent.parent
         self.face_cascade = cv2.CascadeClassifier(str(project_dir.joinpath(r"cascaders/lbpcascade_animeface.xml")))
         self.no_face_img_db = open(str(project_dir.joinpath(r'data/no_face_img_db.csv')), 'w')
         self.caps_dir = Path(dir)
+        self.save_dir = face_dir
 
     def extract_face_and_save(self):
-        save_dir = str(self.caps_dir.parent.joinpath("face"))
-        if not os.path.exists(save_dir): os.mkdir(save_dir)
+        if not os.path.exists(self.save_dir): os.mkdir(self.save_dir)
         writer = csv.writer(self.no_face_img_db, lineterminator='\n')
 
         for file in self.find_all_files():
