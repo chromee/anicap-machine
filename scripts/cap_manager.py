@@ -46,7 +46,7 @@ class CapManager:
 
     def get_faces(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        face_rect = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=1, minSize=(10, 10))
+        face_rect = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3, minSize=(100, 100))
 
         if len(face_rect) <= 0: return None
         return face_rect
