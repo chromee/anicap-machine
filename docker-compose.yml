@@ -1,0 +1,11 @@
+version: '2'
+services:
+  app:
+    build: .
+    container_name: "machine"
+    ports:
+     - "8000:8000"
+    volumes:
+      - .:/code
+    tty: true
+    stdin_open: true
