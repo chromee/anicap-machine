@@ -14,8 +14,8 @@ class RailsConnector:
         file_name = os.path.basename(file_path)
         ext = os.path.splitext(file_path)[1].lstrip(".")
 
-        data = {"picture[name]": file_name, "picture[tag_list]": "aaa"}
-        files = {"picture[photo]": (file_name, img, "image/jpeg")}
+        data = {"capture[name]": file_name, "capture[tag_list]": "aaa"}
+        files = {"capture[picture]": (file_name, img, "image/jpeg")}
 
         res = requests.post(self.post_url, data=data, files=files)
         print(res.status_code)
