@@ -2,4 +2,8 @@ beautifulsoup4
 requests
 numpy
 matplotlib
-opencv
+opencv-python
+django
+
+animeface
+pillow
